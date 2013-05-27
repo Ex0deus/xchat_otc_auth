@@ -1,13 +1,34 @@
-#
+# otc_auth.py
 # Ex0's OTC Authentication Python Module for XChat
 # =========================================================
-# By: Exodeus
-# Version 0.1.2 completed 05.26.2013
+#  
+#  Copyright 2013 Exodeus <exodeus@digitalfrost.net>
+#  Version 0.1.3 completed 05.26.2013
+#  
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
 #
 # =========================================================
 # CHANGE LOG
 # ---------------------------------------------------------
-# 05.26.2013
+# 05.26.2013 Ver 0.1.3
+# ---------------------------------------------------------
+# *	Updated the callback function to a proper xchat style
+#
+# ---------------------------------------------------------
+# 05.26.2013 Ver 0.1.2
 # ---------------------------------------------------------
 # * Fixed some errors.
 # * Got rid of that nagging ":unknown command" in xchat.
@@ -27,7 +48,7 @@ from time import sleep
 
 # Define our module.
 __module_name__ = "Ex0's OTC Authentication Tool"
-__module_version__ = "0.1.2"
+__module_version__ = "0.1.3"
 __module_author__ = "Exodeus"
 __module_description__ = "This is a handy tool for XChat2 IRC client used for OTC Authentication"
 
@@ -91,29 +112,29 @@ def otcauth_decrypt(encrypted_string):
 
 	
 # The callback function to our hook that ties it all together	
-def otcauth_cb(*args): # This section needs to be changed to a proper xchat callback style (word, word_eol, userdata)
-	if len(args) < 2:
+def otcauth_cb(word, word_eol, userdata):
+	if len(word) < 2:
 		switch = "help"
 	else:
-		switch = str(args[0][1])
+		switch = str(word[1])
 	
 	if switch == "help":
-		otcauth_help(args[0][1:])
+		otcauth_help(word_eol[1])
 	elif switch == "version":
 		otcauth_ver()
 	elif switch == "auth":
 		nick = xchat.get_info('nick')
 		xchat.command("MSG gribble eauth %s" % (nick))
 		
-		if len(args[0][2]) != 16:
+		if len(word[2]) != 16:
 			xchat.prnt("You need to supply a valid key id!")
 		else:
-			keyid = args[0][2]
+			keyid = word[2]
 			otcauth_decrypt(otcauth_get_auth(keyid))
 	else:
-		otcauth_help("basic")
+		xchat.prnt("Invalid Option: %s not defined" % (word[1]))
 	
 	return xchat.EAT_XCHAT
 	
-# Hook our functions to a handler
+# Hook our functions to the callback handler
 xchat.hook_command("OTCAUTH", otcauth_cb, help="'/OTCAUTH help' for more help")
