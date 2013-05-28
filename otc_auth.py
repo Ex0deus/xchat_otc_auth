@@ -1,13 +1,13 @@
 # otc_auth.py
 # Ex0's OTC Authentication Python Module for XChat
-# =========================================================
+# ======================================================================
 #  
 #  Copyright 2013 Exodeus <exodeus@digitalfrost.net>
-#  Version 0.1.3 completed 05.26.2013
+#  Version 0.1.4 completed 05.26.2013
 #  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
+#  the Free Software Foundation; either version 3 of the License, or
 #  (at your option) any later version.
 #  
 #  This program is distributed in the hope that it will be useful,
@@ -20,16 +20,23 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #
-# =========================================================
+# ======================================================================
 # CHANGE LOG
-# ---------------------------------------------------------
-# 05.26.2013 Ver 0.1.3
-# ---------------------------------------------------------
-# *	Updated the callback function to a proper xchat style
+# ----------------------------------------------------------------------
+# DATE Ver 0.1.4
+# ----------------------------------------------------------------------
+# * Fleshed out the help function a bit more and added some fixes
+#	to the way help is displayed.
+# * 
 #
-# ---------------------------------------------------------
+# ----------------------------------------------------------------------
+# 05.26.2013 Ver 0.1.3
+# ----------------------------------------------------------------------
+# *	Updated the callback function to a proper xchat style
+# * Changed License to GPL
+# ----------------------------------------------------------------------
 # 05.26.2013 Ver 0.1.2
-# ---------------------------------------------------------
+# ----------------------------------------------------------------------
 # * Fixed some errors.
 # * Got rid of that nagging ":unknown command" in xchat.
 # * Chaged the name of some functions and variables to
@@ -67,10 +74,27 @@ def otcauth_help(topic):
 		switch = "basic"
 	else:
 		switch = topic[1]
-		etc = " ".join(topic)
+		etc = "".join(topic[1])
 
 	if switch == "basic":
-		xchat.prnt(""" OTCAUTH Tool Help page not completed! """)
+		xchat.prnt("""/OTCAUTH  
+=======================================
+An OTC authentication script for XChat2
+	OPTIONS:
+		HELP
+				Display help page
+				or use help <topic>
+				for more help about
+				<topic>	
+
+		AUTH
+				Used to start the
+				GPG Auth process.
+
+		VERSION
+				Returns the scripts
+				version string.""")
+
 	elif switch == "auth":
 		xchat.prnt("/OTCAUTH auth \n\tAuth Help")
 	elif switch == "version":
@@ -83,6 +107,7 @@ def otcauth_help(topic):
 # Get our string to decrypt from gribble
 def otcauth_get_auth(keyid):
 	# Give gribble some time to create the new encrypted string
+	# Need to eliminate the timer. Perhaps with a xchat server hook?
 	sleep(3)
 	
 	# Get our url string and create a string buffer to write to
@@ -119,7 +144,7 @@ def otcauth_cb(word, word_eol, userdata):
 		switch = str(word[1])
 	
 	if switch == "help":
-		otcauth_help(word_eol[1])
+		otcauth_help(word[1:])
 	elif switch == "version":
 		otcauth_ver()
 	elif switch == "auth":
