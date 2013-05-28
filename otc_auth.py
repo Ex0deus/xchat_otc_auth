@@ -3,7 +3,7 @@
 # ======================================================================
 #  
 #  Copyright 2013 Exodeus <exodeus@digitalfrost.net>
-#  Version 0.1.4 completed 05.26.2013
+#  Version 0.2.0 completed 05.28.2013
 #  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,17 @@
 # ======================================================================
 # CHANGE LOG
 # ----------------------------------------------------------------------
-# DATE Ver 0.1.4
+# 05.28.2013 Ver 0.2.0
+# ----------------------------------------------------------------------
+# * Renamed some functions to better suite purposes.
+# * Major changes to some functions.
+# * Need for timer.sleep removed.
+# * Server hook to catch event when gribble sends the link for the auth
+#	string.
+# * New server hook function adapted with ideas from nanotubes eauth
+# 	script. (Link to script on github - http://bit.ly/138FWvk )
+# ----------------------------------------------------------------------
+# 05.27.2013 Ver 0.1.4
 # ----------------------------------------------------------------------
 # * Fleshed out the help function a bit more and added some fixes
 #	to the way help is displayed.
@@ -51,11 +61,10 @@ import xchat
 import gnupg
 import pycurl
 import cStringIO
-from time import sleep
 
 # Define our module.
 __module_name__ = "Ex0's OTC Authentication Tool"
-__module_version__ = "0.1.3"
+__module_version__ = "0.2.0"
 __module_author__ = "Exodeus"
 __module_description__ = "This is a handy tool for XChat2 IRC client used for OTC Authentication"
 
@@ -87,7 +96,7 @@ An OTC authentication script for XChat2
 				for more help about
 				<topic>	
 
-		AUTH
+		EAUTH
 				Used to start the
 				GPG Auth process.
 
@@ -95,8 +104,8 @@ An OTC authentication script for XChat2
 				Returns the scripts
 				version string.""")
 
-	elif switch == "auth":
-		xchat.prnt("/OTCAUTH auth \n\tAuth Help")
+	elif switch == "eauth":
+		xchat.prnt("/OTCAUTH eauth \n\tAuth Help")
 	elif switch == "version":
 		xchat.prnt("/OTCAUTH version \n\tPrints out the current version of the tool")
 	else:
@@ -104,36 +113,38 @@ An OTC authentication script for XChat2
 	
 	return xchat.EAT_XCHAT
 
-# Get our string to decrypt from gribble
-def otcauth_get_auth(keyid):
-	# Give gribble some time to create the new encrypted string
-	# Need to eliminate the timer. Perhaps with a xchat server hook?
-	sleep(3)
-	
-	# Get our url string and create a string buffer to write to
-	url = "http://bitcoin-otc.com/otps/%s" % (str(keyid))
-	buf = cStringIO.StringIO()
-	
-	# Grab our string to decrypt and return it
-	curl = pycurl.Curl()
-	curl.setopt(curl.URL, url)
-	curl.setopt(curl.USERAGENT, """Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)""")
-	curl.setopt(curl.WRITEFUNCTION, buf.write)
-	curl.perform()
-	
-	result = buf.getvalue()
-	buf.close()
-	
-	return result
-	
+# GPG Decryption Function.
 # Use GPG to decrypt the string gribble gave us and send back the verify string
-def otcauth_decrypt(encrypted_string):
+def otcauth_gpg_decrypt(encrypted_string):
 	gpg = gnupg.GPG(use_agent=True)
 	gpg.encoding = 'utf-8'
 	auth_string = gpg.decrypt(encrypted_string)
 
-	xchat.command("MSG gribble everify %s" % (str(auth_string)))
+	return auth_string
+
+# Get our string to decrypt from gribble
+def otcauth_gpg_auth(word, word_eol, userdata):
+	if word[0] == ':gribble!~gribble@unaffiliated/nanotube/bot/gribble':
+		# Get our url
+		url = str(word[-1])
+		buf = cStringIO.StringIO()
+		# Check to make sure we got the proper link.
+		if url[:-16] == "http://bitcoin-otc.com/otps/":
+			# Link Good! cURL our string and decrypt.
+			curl = pycurl.Curl()
+			curl.setopt(curl.URL, url)
+			curl.setopt(curl.USERAGENT, """Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)""")
+			curl.setopt(curl.WRITEFUNCTION, buf.write)
+			curl.perform()
+
+			# Decrypt and message gribble back the verify string.
+			auth_string = buf.getvalue()
+			buf.close()
+			xchat.command("MSG gribble everify %s" % otcauth_gpg_decrypt(auth_string))
+	
 	return xchat.EAT_NONE
+# Hook the server event when gribble messages us.
+xchat.hook_server("PRIVMSG", otcauth_gpg_auth)
 
 	
 # The callback function to our hook that ties it all together	
@@ -141,21 +152,17 @@ def otcauth_cb(word, word_eol, userdata):
 	if len(word) < 2:
 		switch = "help"
 	else:
-		switch = str(word[1])
+		switch = str(word[1]).lower()
 	
 	if switch == "help":
 		otcauth_help(word[1:])
 	elif switch == "version":
 		otcauth_ver()
-	elif switch == "auth":
+	elif switch == "eauth":
 		nick = xchat.get_info('nick')
 		xchat.command("MSG gribble eauth %s" % (nick))
-		
-		if len(word[2]) != 16:
-			xchat.prnt("You need to supply a valid key id!")
-		else:
-			keyid = word[2]
-			otcauth_decrypt(otcauth_get_auth(keyid))
+	elif switch == "bauth":
+		xchat.prnt("RESERVED FOR FUTURE FUNCTIONALITY")
 	else:
 		xchat.prnt("Invalid Option: %s not defined" % (word[1]))
 	
