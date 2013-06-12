@@ -1,10 +1,27 @@
-OTC Auth Tool for XChat2 IRC Client
+Ex0's OTC Toolkit for XChat2 IRC Client
 ========================================================================
+Welcome to version 0.3.0 of the Toolkit.
+In this version a few new features were added.
+* Added a Menu and will be expanding on it
+* Added some styling
+For a complete list of changes read the CHANGES.log
+
+INSTRUCTIONS:
+Load the python script into your xchat client.
+Then from the "OTC Toolkit" menu... select "GPG EAuth" 
+or from the irc command line you can do 
+/otctk help 
+for a more complete list of its functionality.
+
+
+------------------------------------------------------------------------
+OLD README TEXT BELOW (minor corrections to avoid confusion)
+------------------------------------------------------------------------
 This is the first version of this tool
 updates are planned for the future.
 
 In the current state of the tool, one simply need load the tool and do
-"/otcauth eauth". 
+"/otctk eauth". 
 The script makes the assumptions that you are using everything as
 default. Assumes you use the gpghome as set by GPGs default settings.
 It also makes use of the gpg-agent program should a password be needed.
