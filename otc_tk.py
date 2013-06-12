@@ -57,21 +57,21 @@ def otcauth_help(topic):
 		etc = "".join(topic[1])
 
 	if switch == "basic":
-		xchat.prnt("""/OTCTK  
-=======================================
+		xchat.prnt("""\002/OTCTK  
+=======================================\002
 An OTC authentication script for XChat2
 	OPTIONS:
-		HELP
+		\002\00302HELP\00302\002
 				Display help page
 				or use help <topic>
 				for more help about
 				<topic>	
 
-		EAUTH
+		\002\00302EAUTH\00302\002
 				Used to start the
 				GPG Auth process.
 
-		VERSION
+		\002\00302VERSION\00302\002
 				Returns the scripts
 				version string.""")
 
@@ -94,7 +94,8 @@ def otcauth_gpg_decrypt(encrypted_string):
 	return auth_string
 
 # Get our string to decrypt from gribble
-
+global eauthCheck
+eauthCheck = False
 def otcauth_gpg_auth(word, word_eol, userdata):
 	global eauthCheck
 	if word[0] == ':gribble!~gribble@unaffiliated/nanotube/bot/gribble' and eauthCheck == True:
