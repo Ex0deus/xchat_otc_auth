@@ -36,10 +36,17 @@ __module_description__ = "This is a handy Toolkit for #bitcoin-otc on freenode. 
 
 xchat.prnt("\002\00302%s:\00302 \00304[[[LOADED]]]\00304\002" % (__module_name__))
 
-# Creat some menus
+# Create some menus on the menubar
 xchat.command('MENU -p5 ADD "OTC Toolkit"')
-xchat.command('MENU ADD "OTC Toolkit/GPG EAuth" "otctk eauth"')
+xchat.command('MENU ADD "OTC Toolkit/GPG EAuth" "OTCTK EAUTH"')
 xchat.command('MENU ADD "OTC Toolkit/-"')
+xchat.command('MENU ADD "OTC Toolkit/Get Voice" "MSG gribble voiceme"')
+
+# Create some menus for our nicklist popup
+xchat.command('MENU ADD "$NICK/OTC Toolkit"')
+xchat.command('MENU ADD "$NICK/OTC Toolkit/Get WoT Rating" "MSG gribble getrating %s"')
+xchat.command('MENU ADD "$NICK/OTC Toolkit/GPG Information" "MSG gribble gpg info %s"')
+
 
 # Print Version Information
 def otcauth_ver():
@@ -76,9 +83,9 @@ An OTC authentication script for XChat2
 				version string.""")
 
 	elif switch == "eauth":
-		xchat.prnt("/OTCTK eauth \n\tAuth Help")
+		xchat.prnt("\002\00304/OTCTK\00304 \00302eauth\00302\002 \n\tAuth Help")
 	elif switch == "version":
-		xchat.prnt("/OTCTK version \n\tPrints out the current version of the tool")
+		xchat.prnt("\002\00304/OTCTK\00304 \00302version\00302\002 \n\tPrints out the current version of the tool")
 	else:
 		xchat.prnt("I don't know anything about topic: %s" % (str(etc)))
 	
@@ -153,8 +160,14 @@ def otcauth_unload_cb(userdata):
 	# Remove our MENU's 
 	xchat.command('MENU DEL "OTC Toolkit/GPG EAuth" "otctk eauth"')
 	xchat.command('MENU DEL "OTC Toolkit/-"')
+	xchat.command('MENU DEL "OTC Toolkit/Get Voice"')
 	xchat.command('MENU DEL "OTC Toolkit"')
 
+	# Remove nicklist popup menus
+	xchat.command('MENU DEL "$NICK/OTC Toolkit/Get WoT Rating"')
+	xchat.command('MENU DEL "$NICK/OTC Toolkit/GPG Information"')
+	xchat.command('MENU DEL "$NICK/OTC Toolkit"')
+	
 	# Print out our unloaded message.
 	xchat.prnt("\002\00302%s:\00302 \00304[[[UNLOADED]]]\00304\002" % __module_name__)
 	return xchat.EAT_XCHAT
